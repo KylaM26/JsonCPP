@@ -1,0 +1,21 @@
+{
+	
+	"player" : {
+			"name" : "kyla",
+			"level" : "1",
+			"gear" : {
+				"hat" : "warrior's hat",
+				"robe" : "robe of destruction",
+				"boots" : "steel boots"
+			},
+
+			"location" : {
+				"world" : "north pole",
+				"destination" : "santa's workshop",
+				"world-x-position" : "48543.2f",
+				"world-y-position" : "2849.9f"
+			}
+
+	}
+
+}
