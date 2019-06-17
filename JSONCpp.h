@@ -38,7 +38,6 @@ namespace JSONCpp {
 			if (this->mainKey == mainKey) {
 				int counter = 0;
 				while (counter < complexJSON.second.size()) {
-				//	std::cout << "KEY: " << complexJSON.second.at(counter).key << std::endl;
 					if (complexJSON.second.at(counter).key == subKey) {
 						return complexJSON.second.at(counter).FindValueByKey(subKey);
 					}
@@ -46,11 +45,11 @@ namespace JSONCpp {
 					counter++;
 				}
 
-			std::cout << "Could not find subkey \"" << subKey << "\" of main key \"" << mainKey << "\", file: " __FILE__ << std::endl;
+			std::cout << "Could not find subkey \"" << subKey << "\" of main key \"" << mainKey << std::endl;
 			return "";
 
 			} else {
-				std::cout << "Could not find main key: " << mainKey << ", file: " __FILE__ << std::endl;
+				std::cout << "Could not find main key: " << mainKey << std::endl;
 				return "";
 			}
 
@@ -65,7 +64,6 @@ namespace JSONCpp {
 
 		std::vector<JSON> simpleJSON;
 		std::vector<ComplexJSON> complexJSON;
-		//std::vector<std::pair<std::string, std::vector<JSON>>> complexJSON;
 		std::vector<std::string> completeJSON;
 
 		std::string jsonObjString;
@@ -142,9 +140,6 @@ namespace JSONCpp {
 			return jsonObjString;
 		}
 		const std::string GetMainKey() const { return mainKey; }
-		const bool ContainsKeyOf(std::string key) const {
-			return (jsonObjString.find(key) ? true : false);
-		}
 	
 		const std::vector<JSON> GetJSON() const { return simpleJSON; }
 		const std::vector<ComplexJSON> GetComplexJSON() const { return complexJSON; }
@@ -204,13 +199,13 @@ namespace JSONCpp {
 								return jsonObjects.at(i).GetJSON().at(j).FindValueByKey(subKey);
 							}			
 						} else {
-							std::cout << "Could not find subkey \"" << subKey << "\" of main key \"" << mainKey << "\", file: " __FILE__ << std::endl;
+							std::cout << "Could not find subkey \"" << subKey << "\" of main key \"" << mainKey << std::endl;
 							return "";
 						}
 					}
 				}
 			} else {
-				std::cout << "Could not find main key: " << mainKey << ", file: " __FILE__ << std::endl;
+				std::cout << "Could not find main key: " << mainKey << std::endl;
 				return "";
 			}
 		}
@@ -227,14 +222,14 @@ namespace JSONCpp {
 							}
 						}
 						else {
-							std::cout << "Could not find subkey \"" << subKey << "\" of main key \"" << mainKey << "\", file: " << __FILE__ << std::endl;
+							std::cout << "Could not find subkey \"" << subKey << "\" of main key \"" << mainKey << std::endl;
 							return "";
 						}
 					}
 				}
 			}
 			else {
-				std::cout << "Could not find main key: " << mainKey << ", file: " << __FILE__ << std::endl;
+				std::cout << "Could not find main key: " << mainKey << ", file: " <<  std::endl;
 				return "";
 			}
 		}
