@@ -104,7 +104,7 @@ namespace JSONCpp {
 
 			// Complex parsing
 			for (int index = 0; index < complexJSON.size(); index++) { // For all pairs in the vector
-				completeJSON.push_back(tab + tab + tab + quote + complexJSON.at(index).GetKey() + quote + colon + openBracket + newLine); // Parse the main key
+				completeJSON.push_back(newLine + tab + tab + tab + quote + complexJSON.at(index).GetKey() + quote + colon + openBracket + newLine); // Parse the main key
 				if (index != complexJSON.size() - 1) { // If not the last object in the vector
 					for (int pair = 0; pair < complexJSON.at(index).GetJSONValues().size(); pair++) { // If the pairs are less then the sizeof the vector of jsons
 						if (pair != complexJSON.at(index).GetJSONValues().size() - 1)
@@ -116,17 +116,17 @@ namespace JSONCpp {
 				else {
 					for (int pair = 0; pair < complexJSON.at(index).GetJSONValues().size(); pair++) { // If the pairs are less then the sizeof the vector of jsons
 						if (pair != complexJSON.at(index).GetJSONValues().size() - 1)
-							completeJSON.push_back(tab + tab + tab + tab + quote + complexJSON.at(index).GetJSONValues().at(pair).key + quote + colon + quote + complexJSON.at(complexJSON.size() - 1).GetJSONValues().at(pair).value + quote + comma + newLine);
+							completeJSON.push_back(tab + tab + tab + tab + quote + complexJSON.at(index).GetJSONValues().at(pair).key + quote + colon + quote + complexJSON.at(index).GetJSONValues().at(pair).value + quote + comma + newLine);
 						else
-							completeJSON.push_back(tab + tab + tab + tab + quote + complexJSON.at(index).GetJSONValues().at(pair).key + quote + colon + quote + complexJSON.at(complexJSON.size() - 1).GetJSONValues().at(pair).value + quote + newLine);
+							completeJSON.push_back(tab + tab + tab + tab + quote + complexJSON.at(index).GetJSONValues().at(pair).key + quote + colon + quote + complexJSON.at(index).GetJSONValues().at(pair).value + quote + newLine);
 					}
 				}
 
 				if (index != complexJSON.size() - 1) {
-					completeJSON.push_back(tab + tab + tab + closeBracket + comma + newLine + newLine);
+					completeJSON.push_back(tab + tab + tab + closeBracket + comma + newLine);
 				}
 				else {
-					completeJSON.push_back(tab + tab + tab + closeBracket + newLine + newLine);
+					completeJSON.push_back(tab + tab + tab + closeBracket + newLine );
 				}
 			}
 
@@ -158,6 +158,9 @@ namespace JSONCpp {
 		std::vector<std::pair<std::string, std::vector<JSON>>> complexJSONContent;
 
 	public:
+		JSONFile() {
+			this->filePath = "jsonfile.json";
+		}
 		JSONFile(const std::string& filePath) { this->filePath = filePath; }
 		void AddJSONObject(const JSONObject& jsonObject) { jsonObjects.push_back(jsonObject); }
 		void Format() {
