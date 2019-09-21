@@ -1,0 +1,21 @@
+{
+	
+	"player" : {
+			"name" : "Kyla",
+			"level" : "1",
+			"pvp-ranking" : "394",
+
+			"gear" : {
+				"hat" : "warrior's hat",
+				"robe" : "robe of destruction",
+				"boots" : "steel boots"
+			},
+
+			"texture" : {
+				"hat-texture" : "t48f348.png",
+				"robe-texture" : "jfv483n7.png",
+				"boots-texture" : "1dhjfa8.png"
+			}
+	}
+
+}
