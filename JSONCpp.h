@@ -4,9 +4,16 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <sstream>
 #include <string>
 
 namespace JSONCpp {
+
+	struct JSONInformation {
+	public:
+		bool didFind;
+		std::string str;
+	};
 
 	typedef struct JSON {
 	public:
@@ -152,8 +159,8 @@ namespace JSONCpp {
 
 		std::string filePath;
 		std::string fileContent;
-
 		std::vector<JSONObject> jsonObjects;
+
 		std::vector<std::pair<std::string, std::string>> simpleJSONContent;
 		std::vector<std::pair<std::string, std::vector<JSON>>> complexJSONContent;
 
@@ -193,51 +200,127 @@ namespace JSONCpp {
 
 		}
 
-		const std::string FindValueByKeys(const std::string& mainKey, const std::string& subKey) {
-			if (fileContent.find(mainKey) != std::string::npos) {
-				for (int i = 0; i < jsonObjects.size(); i++) {
-					if (jsonObjects.at(i).GetMainKey() == mainKey) {
-						if (jsonObjects.at(i).GetJSONObjectString().find(subKey) != std::string::npos) {
-							for (int j = 0; j < jsonObjects.at(i).GetJSON().size(); j++) {
-								return jsonObjects.at(i).GetJSON().at(j).FindValueByKey(subKey);
-							}			
-						} else {
-							std::cout << "Could not find subkey \"" << subKey << "\" of main key \"" << mainKey << std::endl;
-							return "";
-						}
-					}
-				}
-			} else {
-				std::cout << "Could not find main key: " << mainKey << std::endl;
-				return "";
+	} JSONFile, JsonFile;
+
+	typedef struct JSONFileReader {
+	private:
+		std::ifstream file;
+		std::string fileContent;
+		const char* filePath;
+		std::vector<std::string> keyPairs;
+
+		void ReadFile() {
+			file.open(filePath, std::ios::out);
+
+			if (!file.is_open()) {
+				std::cout << "Failed to open file for reading: " << filePath << std::endl;
+				return;
 			}
+
+			std::string code = "";
+
+			while (getline(file, code)) {
+				fileContent.append(code + "\n");
+			}
+
+			file.close();
 		}
-	
-		const std::string FindValueByKeys(const std::string& mainKey, const std::string& subKey, const std::string& finalKey) {
-			if (fileContent.find(mainKey) != std::string::npos) {
-				for (int i = 0; i < jsonObjects.size(); i++) {
-					if (jsonObjects.at(i).GetMainKey() == mainKey) {
-						if (jsonObjects.at(i).GetJSONObjectString().find(subKey) != std::string::npos) {
-							for (int j = 0; j < jsonObjects.at(i).GetComplexJSON().size(); j++) {
-								if (jsonObjects.at(i).GetComplexJSON().at(j).GetKey() == subKey) {
-									return jsonObjects.at(i).GetComplexJSON().at(j).FindValueByKey(subKey, finalKey);
-								}
-							}
-						}
-						else {
-							std::cout << "Could not find subkey \"" << subKey << "\" of main key \"" << mainKey << std::endl;
-							return "";
+		void ParseKeyValuePairs() {
+			const char* jsonData = fileContent.c_str();
+
+			bool isOpenQuote = false;
+			int characterIndex = 0, infoIndex = -1;
+
+			while (characterIndex < strlen(jsonData)) {
+				switch (*++jsonData) {
+				case '"': {
+					if (isOpenQuote) { // If qoute is open but finds another
+						isOpenQuote = false; // close the qoute
+
+					}
+					else {
+						isOpenQuote = true; // If found open qoute
+						keyPairs.push_back(std::string(""));
+						infoIndex++;
+					}
+
+				} break;
+				case '\n':
+					break;
+
+				case '\t':
+					break;
+
+				case ' ':
+					break;
+
+				case '{':
+					break;
+
+				case '}':
+					break;
+
+				case ':':
+					break;
+
+				case ',':
+					break;
+
+				default: {
+					if (isOpenQuote) {
+						if (keyPairs.size() > 0) {
+							keyPairs.at(infoIndex) += jsonData[characterIndex];
 						}
 					}
+				} break;
+					characterIndex++;
 				}
-			}
-			else {
-				std::cout << "Could not find main key: " << mainKey << ", file: " <<  std::endl;
-				return "";
+
+
 			}
 		}
 
-	} JSONFile, JsonFile;
+		const bool DidFindKey(const char* key) const {
+			for (int index = 0; index < keyPairs.size(); index++) {
+				if (strcmp(keyPairs.at(index).c_str(), key) == 0)
+					return true;
+			}
+			return false;
+		}
+
+	public:
+		JSONFileReader(const char* filePath) {
+			this->filePath = filePath;
+			ReadFile();
+			ParseKeyValuePairs();
+		}
+
+		const std::string GetKey(const char* jsonObjectName, const char* key) const {
+			if (DidFindKey(jsonObjectName)) {
+				for (int index = 0; index < keyPairs.size(); index++) {
+					if (strcmp(keyPairs.at(index).c_str(), key) == 0)
+						return keyPairs.at(index + 1);
+				}
+			}
+
+			std::cout << "Could not find '" << jsonObjectName << "' or '" << key << "'." << std::endl;
+			return "";
+		}
+
+		const std::string GetKey(const char* jsonObjectName, const char* subObjectName, const char* key) const {
+			if (DidFindKey(jsonObjectName)) {
+				if (DidFindKey(subObjectName)) {
+					for (int index = 0; index < keyPairs.size(); index++) {
+						if (strcmp(keyPairs.at(index).c_str(), key) == 0)
+							return keyPairs.at(index + 1);
+					}
+				}
+			}
+
+			std::cout << "Could not find '" << jsonObjectName << "or '" << "'" << subObjectName << "' or '" << key << "'." << std::endl;
+			return "";
+		}
+	} JsonFileReader, JSONFileReader;
 
 	float StringToFloat(std::string str) {
 		return atof(str.c_str());
