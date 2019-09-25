@@ -8,13 +8,6 @@
 #include <string>
 
 namespace JSONCpp {
-
-	struct JSONInformation {
-	public:
-		bool didFind;
-		std::string str;
-	};
-
 	typedef struct JSON {
 	public:
 		std::string key, value;
@@ -28,25 +21,30 @@ namespace JSONCpp {
 		const std::string FindValueByKey(const std::string key) const { return value; }
 	} Json, JSON;
 
-	typedef struct ComplexJSON {
+	typedef struct NestedJSON {
 	private:
 		std::string mainKey;
-		std::pair<std::string, std::vector<JSON>> complexJSON;
+		std::pair<std::string, std::vector<JSON>> nestedJSON;
+		std::pair<std::string, std::vector<NestedJSON>> complexJSON;
 	public:
-		ComplexJSON() { this->mainKey = ""; };
-		ComplexJSON(std::string mainKey) { this->mainKey = mainKey; };
+		NestedJSON() { this->mainKey = ""; };
+		NestedJSON(std::string mainKey) { this->mainKey = mainKey; };
 
-		void AddJSON(const JSON& json) { complexJSON.second.push_back(json); }
+		void AddJSON(const JSON& json) { nestedJSON.second.push_back(json); }
+		void AddJSON(const NestedJSON& json) {
+			complexJSON.second.push_back(json);
+		}
 
 		const std::string GetKey() const { return mainKey; }
-		const std::vector<JSON> GetJSONValues() { return complexJSON.second; }
-		const std::pair<std::string, std::vector<JSON>> GetJSON() const { return complexJSON; }
+		const std::vector<JSON> GetJSONValues() { return nestedJSON.second; }
+		const std::vector<NestedJSON> GetComplexJSONValues() { return complexJSON.second; }
+		const std::pair<std::string, std::vector<JSON>> GetJSON() const { return nestedJSON; }
 		const std::string FindValueByKey(const std::string& mainKey, const std::string& subKey) const {
 			if (this->mainKey == mainKey) {
 				int counter = 0;
-				while (counter < complexJSON.second.size()) {
-					if (complexJSON.second.at(counter).key == subKey) {
-						return complexJSON.second.at(counter).FindValueByKey(subKey);
+				while (counter < nestedJSON.second.size()) {
+					if (nestedJSON.second.at(counter).key == subKey) {
+						return nestedJSON.second.at(counter).FindValueByKey(subKey);
 					}
 
 					counter++;
@@ -63,14 +61,14 @@ namespace JSONCpp {
 
 		}
 
-	} ComplexJSON, ComplexJson;
+	} NestedJSON, NestedJson;
 
 	typedef struct JSONObject {
 	private:
 		std::string mainKey;
 
 		std::vector<JSON> simpleJSON;
-		std::vector<ComplexJSON> complexJSON;
+		std::vector<NestedJSON> complexJSON;
 		std::vector<std::string> completeJSON;
 
 		std::string jsonObjString;
@@ -82,7 +80,7 @@ namespace JSONCpp {
 			simpleJSON.push_back(json);
 		}
 
-		void AddJSON(const ComplexJSON& json) {
+		void AddJSON(const NestedJSON& json) {
 			complexJSON.push_back(json);
 		}
 
@@ -109,23 +107,25 @@ namespace JSONCpp {
 				}
 			}
 
-			// Complex parsing
+			// Complex json formatting
 			for (int index = 0; index < complexJSON.size(); index++) { // For all pairs in the vector
 				completeJSON.push_back(newLine + tab + tab + tab + quote + complexJSON.at(index).GetKey() + quote + colon + openBracket + newLine); // Parse the main key
 				if (index != complexJSON.size() - 1) { // If not the last object in the vector
 					for (int pair = 0; pair < complexJSON.at(index).GetJSONValues().size(); pair++) { // If the pairs are less then the sizeof the vector of jsons
-						if (pair != complexJSON.at(index).GetJSONValues().size() - 1)
+						if (pair != complexJSON.at(index).GetJSONValues().size() - 1) {
 							completeJSON.push_back(tab + tab + tab + tab + quote + complexJSON.at(index).GetJSONValues().at(pair).key + quote + colon + quote + complexJSON.at(index).GetJSONValues().at(pair).value + quote + comma + newLine);
-						else
+						} else { // If last one
 							completeJSON.push_back(tab + tab + tab + tab + quote + complexJSON.at(index).GetJSONValues().at(pair).key + quote + colon + quote + complexJSON.at(index).GetJSONValues().at(pair).value + quote + newLine);
+						}
 					}
 				}
 				else {
 					for (int pair = 0; pair < complexJSON.at(index).GetJSONValues().size(); pair++) { // If the pairs are less then the sizeof the vector of jsons
-						if (pair != complexJSON.at(index).GetJSONValues().size() - 1)
+						if (pair != complexJSON.at(index).GetJSONValues().size() - 1) {
 							completeJSON.push_back(tab + tab + tab + tab + quote + complexJSON.at(index).GetJSONValues().at(pair).key + quote + colon + quote + complexJSON.at(index).GetJSONValues().at(pair).value + quote + comma + newLine);
-						else
+						} else {
 							completeJSON.push_back(tab + tab + tab + tab + quote + complexJSON.at(index).GetJSONValues().at(pair).key + quote + colon + quote + complexJSON.at(index).GetJSONValues().at(pair).value + quote + newLine);
+						}
 					}
 				}
 
@@ -149,26 +149,22 @@ namespace JSONCpp {
 		const std::string GetMainKey() const { return mainKey; }
 	
 		const std::vector<JSON> GetJSON() const { return simpleJSON; }
-		const std::vector<ComplexJSON> GetComplexJSON() const { return complexJSON; }
+		const std::vector<NestedJSON> GetComplexJSON() const { return complexJSON; }
 
 	} JsonObject, JSONObject;
 
-	typedef struct JSONFile {
+	typedef struct JSONFileWriter {
 	private:
 		std::fstream file;
 
 		std::string filePath;
 		std::string fileContent;
 		std::vector<JSONObject> jsonObjects;
-
-		std::vector<std::pair<std::string, std::string>> simpleJSONContent;
-		std::vector<std::pair<std::string, std::vector<JSON>>> complexJSONContent;
-
 	public:
-		JSONFile() {
-			this->filePath = "jsonfile.json";
+		JSONFileWriter() {
+			this->filePath = "JSONFileWriter.json";
 		}
-		JSONFile(const std::string& filePath) { this->filePath = filePath; }
+		JSONFileWriter(const std::string& filePath) { this->filePath = filePath; }
 		void AddJSONObject(const JSONObject& jsonObject) { jsonObjects.push_back(jsonObject); }
 		void Format() {
 			file.open(filePath, std::ios::out | std::ios::trunc);
@@ -200,7 +196,7 @@ namespace JSONCpp {
 
 		}
 
-	} JSONFile, JsonFile;
+	} JSONFileWriter, JSONFileWriter;
 
 	typedef struct JSONFileReader {
 	private:
@@ -251,9 +247,6 @@ namespace JSONCpp {
 				case '\t':
 					break;
 
-				case ' ':
-					break;
-
 				case '{':
 					break;
 
@@ -275,17 +268,17 @@ namespace JSONCpp {
 				} break;
 					characterIndex++;
 				}
-
-
 			}
 		}
 
-		const bool DidFindKey(const char* key) const {
+		const int DidFindKey(const char* key) const {
 			for (int index = 0; index < keyPairs.size(); index++) {
 				if (strcmp(keyPairs.at(index).c_str(), key) == 0)
-					return true;
+					return index;
+				else
+					continue;
 			}
-			return false;
+			return -1;
 		}
 
 	public:
@@ -293,34 +286,38 @@ namespace JSONCpp {
 			this->filePath = filePath;
 			ReadFile();
 			ParseKeyValuePairs();
+
 		}
 
-		const std::string GetKey(const char* jsonObjectName, const char* key) const {
-			if (DidFindKey(jsonObjectName)) {
-				for (int index = 0; index < keyPairs.size(); index++) {
-					if (strcmp(keyPairs.at(index).c_str(), key) == 0)
-						return keyPairs.at(index + 1);
-				}
-			}
+		const std::string GetValueForKey(const char* jsonObjectName, const char* key) const {
+			int i = DidFindKey(jsonObjectName);
+			int j = DidFindKey(key) + i;
+
+			if (i > -1 && j > -1)
+				return keyPairs.at(j + 1);
 
 			std::cout << "Could not find '" << jsonObjectName << "' or '" << key << "'." << std::endl;
 			return "";
 		}
 
-		const std::string GetKey(const char* jsonObjectName, const char* subObjectName, const char* key) const {
-			if (DidFindKey(jsonObjectName)) {
-				if (DidFindKey(subObjectName)) {
-					for (int index = 0; index < keyPairs.size(); index++) {
-						if (strcmp(keyPairs.at(index).c_str(), key) == 0)
-							return keyPairs.at(index + 1);
-					}
+		// Test with anothe object in file.
+		const std::string GetValueForKey(const char* jsonObjectName, const char* subObjectName, const char* key) const {
+			int i = DidFindKey(jsonObjectName);
+			int j = DidFindKey(subObjectName) + (i - 1);
+						
+			if (i > -1 && j > -1) {
+				for (int k = j; k < keyPairs.size(); k++) {
+					if (strcmp(keyPairs.at(k).c_str(), key) == 0)
+						return keyPairs.at(k + 1);
+					else
+						continue;
 				}
 			}
-
-			std::cout << "Could not find '" << jsonObjectName << "or '" << "'" << subObjectName << "' or '" << key << "'." << std::endl;
+			
+			std::cout << "Could not find one or more keys of '" << jsonObjectName << "','"  << subObjectName << "','" << key << "'." << std::endl;
 			return "";
 		}
-	} JsonFileReader, JSONFileReader;
+	} JSONFileReader, JSONFileReader;
 
 	float StringToFloat(std::string str) {
 		return atof(str.c_str());
