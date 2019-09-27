@@ -225,6 +225,7 @@ namespace JSONCpp {
 			const char* jsonData = fileContent.c_str();
 
 			bool isOpenQuote = false;
+			bool isOpenBracket = false;
 			int characterIndex = 0, infoIndex = -1;
 
 			while (characterIndex < strlen(jsonData)) {
@@ -243,6 +244,19 @@ namespace JSONCpp {
 				} break;
 				case '\n':
 					break;
+
+				case '[': {
+					if (!isOpenBracket) {
+						// push all array values to arr
+						// ask for subkey it is under
+						//
+					}
+
+				} break;
+
+				case ']': {
+					isOpenBracket = false;
+				}
 
 				case '\t':
 					break;
